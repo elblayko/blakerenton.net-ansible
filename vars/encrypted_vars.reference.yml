@@ -1,0 +1,19 @@
+fleet_secret:
+  host: https://0123456789abcdef.fleet.us-west-2.aws.found.io:443
+  agent_enrollment_token: ABCDEFabcdef==
+
+cloudflare_secret:
+  email: hello@not-a-domain.com
+  api_key: ABCDEFabcdef1234567890
+
+users:
+  - name: my-user
+    password: MySuperSecurePassword
+    sudo: true
+    groups:
+      - users
+    pub_key: ssh-rsa 12345
+
+ufw:
+  no_rate_limit:
+    - 1.2.3.4
