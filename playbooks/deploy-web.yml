@@ -1,0 +1,46 @@
+- name: Deploy web application
+  hosts: web_servers
+  gather_facts: false
+
+  vars_files:
+    - /ansible/vars/vars.yml
+    - /ansible/vars/encrypted_vars.yml
+
+  tasks:
+    - name: Clone production repository
+      git:
+        repo: https://github.com/elblayko/blakerenton.net-app.git
+        dest: /home/blake/blakerenton-net
+        version: dev
+
+    - name: Create acme.json and set permissions
+      become: true
+      file:
+        path: /home/blake/blakerenton-net/acme.json
+        state: touch
+        mode: 0600
+        access_time: preserve
+        modification_time: preserve
+
+    - name: Add CloudFlare API key to environment file
+      become: true
+      blockinfile:
+        path: /home/blake/blakerenton-net/conf/traefik.env
+        create: true
+        mode: 0600
+        block: |
+          CLOUDFLARE_EMAIL={{ cloudflare.email }}
+          CLOUDFLARE_API_KEY={{ cloudflare.api_key }}
+
+    - name: Add CloudFlare e-mail address to Traefik static configuration
+      replace:
+        path: /home/blake/blakerenton-net/conf/traefik.yml
+        regexp: "\\${CLOUDFLARE_EMAIL}"
+        replace: "{{ cloudflare.email }}"
+
+      # Ansible doesn't support Docker Compose > 2.0, use shell instead.
+      # Ref: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_compose_module.html
+
+    - name: Start Docker Compose project
+      become: true
+      command: docker compose -f /home/blake/blakerenton-net/docker-compose.yml up -d --force-recreate
