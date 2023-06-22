@@ -4,5 +4,5 @@
 - name: Install Docker
   import_playbook: install-docker.yml
 
-- name: Install Elastic Agent
-  import_playbook: install-elastic-agent.yml
+# - name: Install Elastic Agent
+#   import_playbook: install-elastic-agent.yml
